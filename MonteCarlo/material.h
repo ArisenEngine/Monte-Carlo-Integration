@@ -15,7 +15,7 @@ public:
     }
 
     virtual bool scatter(
-        const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const = 0;
+        const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered, bool importance_sampling = false) const = 0;
 };
 
 
@@ -24,7 +24,7 @@ public:
     lambertian(const color& a) : albedo(make_shared<solid_color>(a)) {}
     lambertian(std::shared_ptr<texture> a) : albedo(a) {}
 
-    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered)
+    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered, bool importance_sampling = false)
         const override {
         auto scatter_direction = rec.normal + random_unit_vector();
         
@@ -49,7 +49,7 @@ public:
     metal(const color& a, double f = 0.0) : albedo(make_shared<solid_color>(a)), fuzz(f < 1 ? f : 1) {}
     metal(std::shared_ptr<texture> a, double f = 0.0) : albedo(a), fuzz(f < 1 ? f : 1) {}
 
-    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered)
+    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered, bool importance_sampling = false)
         const override {
         vec3 reflected = reflect(normalize(r_in.direction()), rec.normal);
         scattered = ray(rec.p, reflected + fuzz * random_in_unit_sphere(), r_in.time());
@@ -66,7 +66,7 @@ class dielectric : public material {
 public:
     dielectric(double index_of_refraction) : ir(index_of_refraction) {}
 
-    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered)
+    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered, bool importance_sampling = false)
         const override {
         attenuation = color(1.0, 1.0, 1.0);
         double refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
@@ -121,7 +121,7 @@ public:
     diffuse_light(shared_ptr<texture> a) : emit(a) {}
     diffuse_light(color c) : emit(make_shared<solid_color>(c)) {}
 
-    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered)
+    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered, bool importance_sampling = false)
         const override {
         return false;
     }
@@ -139,7 +139,7 @@ public:
     isotropic(color c) : albedo(make_shared<solid_color>(c)) {}
     isotropic(shared_ptr<texture> a) : albedo(a) {}
 
-    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered)
+    bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered, bool importance_sampling = false)
         const override {
         scattered = ray(rec.p, random_unit_vector(), r_in.time());
         attenuation = albedo->value(rec.u, rec.v, rec.p);

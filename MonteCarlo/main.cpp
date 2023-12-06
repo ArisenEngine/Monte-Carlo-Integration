@@ -24,7 +24,7 @@
 #pragma comment(lib,"opencv_world481.lib")
 #endif
 
-void quads(hittable_list& world) {
+void quads_glossy(hittable_list& world) {
 	
 
 	// Materials
@@ -57,6 +57,28 @@ void quads(hittable_list& world) {
 	world.add(make_shared<quad>(point3(size / 2., size / 2., size / 2.), vec3(-size, 0, 0), vec3(0, 0, -size), back));
 	world.add(make_shared<quad>(point3(-size / 2., -size / 2., -size / 2.), vec3(size, 0, 0), vec3(0, 0, size), front));
 
+	// sphere 
+	auto lambertian_sphere = make_shared<lambertian>(color(1.0, 1.0, 1.0));
+	world.add(make_shared<sphere>(point3(0, 0, 0), 5, lambertian_sphere));
+
+}
+
+void quads_lambertian(hittable_list& world) {
+
+	const int size = 40000;
+
+	// Quads
+	auto quad_color = make_shared<lambertian>(color(0.5, 0.2, 0.3));
+	world.add(make_shared<quad>(point3(-size / 2., 0, -size / 2.), vec3(size, 0, 0), vec3(0, 0, size), quad_color));
+
+
+	auto light = make_shared<diffuse_light>(color(2, 2, 2));
+	world.add(make_shared<quad>(point3(-2., 15, -2.), vec3(4, 0, 0), vec3(0, 0, 4), light));
+
+	// sphere 
+	auto lambertian_sphere = make_shared<lambertian>(color(0.7, 0.7, 0.7));
+	world.add(make_shared<sphere>(point3(0, 3, 0), 3, lambertian_sphere));
+
 }
 
 int main(int argc, char* argv[])
@@ -70,7 +92,22 @@ int main(int argc, char* argv[])
 
 	hittable_list world;
 	
-	quads(world);
+	int scene_selection = -1;
+
+	std::cout << " Input a number(0 - 1): ";
+	std::cin >> scene_selection;
+	switch (scene_selection)
+	{
+	case 0:
+		quads_lambertian(world);
+		break;
+		
+	case 1:
+		quads_glossy(world);
+		break;
+	default:
+		return 0;
+	}
 
 	const float aspect_ratio = 1;
 	const int height = 500;
@@ -84,22 +121,34 @@ int main(int argc, char* argv[])
 	std::vector<camera*> cameras;
 	cameras.emplace_back(
 		new camera(
-			"uniform random samples",   // name
+			"uniform samples",   // name
 			vec3(0, 0, 0),              // pos
 			0.1, 10000,                 // near far
 			60,                         // fov
 			width, height,              // buffer size
 			10,                         // bounce
-			10                          // samples
+			100,                         // samples,
+			false                        // importance sampling
 		));
 
+	cameras.emplace_back(
+		new camera(
+			"importance samples",       // name
+			vec3(0, 0, 0),              // pos
+			0.1, 10000,                 // near far
+			60,                         // fov
+			width, height,              // buffer size
+			10,                         // bounce
+			100,                          // samples
+			true                        // importance sampling
+		));
 
 	for (auto& _camera : cameras)
 	{
 		_camera->set_defocus_angle(0.0);
-		_camera->set_fov(120.0);
-		_camera->set_position(vec3(0, 0, -5));
-		_camera->look_at(vec3(0, 0, 0));
+		_camera->set_fov(70.0);
+		_camera->set_position(vec3(0, 10, 20));
+		_camera->look_at(vec3(0, 2.5, 0));
 		_camera->render(world, width / tile_count);
 	}
 

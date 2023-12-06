@@ -27,7 +27,7 @@ public:
 	std::string name{"default"};
 	cv::Mat* buffer{nullptr};
 
-	camera(std::string name, vec3 position, float near, float far, float fov, int width, int height, int bounce = 10, int samples = 10) :
+	camera(std::string name, vec3 position, float near, float far, float fov, int width, int height, int bounce, int samples, bool importance) :
 		_position(position),
 		_fov(fov),
 		_near(near),
@@ -35,7 +35,8 @@ public:
 		_aspect_ratio((float)width / height),
 		name(name),
 		bounce(bounce),
-		sample_count(samples)
+		sample_count(samples),
+		importance_sampling(importance)
 	{
 		cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
 		buffer = new cv::Mat(std::vector<int>{height, width}, CV_8UC3, cv::Scalar( 0 ,0 ,0));
@@ -112,10 +113,10 @@ public:
 	// ray tracing
 	int sample_count{ 10 };
 	int bounce{ 10 };
-	color  background;               // Scene background color
+	color background;               // Scene background color
+	bool importance_sampling{false};
 
-
-	void render(const hittable_list& world, int tile_size = 128)
+	void render(const hittable_list& world, int tile_size)
 	{
 
 		if (_rendering_thread.joinable())
@@ -125,6 +126,7 @@ public:
 
 		_is_running = true;
 		_world = world;
+		
 
 		void (camera:: * tracer)(cv::Mat * buffer,
 			const int rows_start, const int rows_end,
@@ -226,22 +228,20 @@ private:
 
 		if (bounce <= 0 || !_is_running)
 		{
-			return color(1, 1, 1);
+			return color(0, 0, 0);
 		}
 
 		hit_record rec;
 
 		// If the ray hits nothing, return the background color.
 		if (!world.hit(r, interval(0.001, infinity), rec))
-			return sky_color(r);
-
-		
+			return background;
 
 		ray scattered;
 		color attenuation;
 		color color_from_emission = rec.mat->emitted(rec.u, rec.v, rec.p);
 
-		if (!rec.mat->scatter(r, rec, attenuation, scattered))
+		if (!rec.mat->scatter(r, rec, attenuation, scattered, importance_sampling))
 			return color_from_emission;
 
 		color color_from_scatter = attenuation * ray_cast(scattered, world, bounce - 1);
