@@ -24,23 +24,38 @@
 #pragma comment(lib,"opencv_world481.lib")
 #endif
 
-
 void quads(hittable_list& world) {
 	
 
 	// Materials
-	auto left_red = make_shared<lambertian>(color(1.0, 0.2, 0.2));
-	auto back_green = make_shared<lambertian>(color(0.2, 1.0, 0.2));
-	auto right_blue = make_shared<lambertian>(color(0.2, 0.2, 1.0));
-	auto upper_orange = make_shared<lambertian>(color(1.0, 0.5, 0.0));
-	auto lower_teal = make_shared<lambertian>(color(0.2, 0.8, 0.8));
+	auto left_image = make_shared<image_texture>("left.jpg");
+	auto left = make_shared<diffuse_light>(left_image);
+	auto right_image = make_shared<image_texture>("right.jpg");
+	auto right = make_shared<diffuse_light>(right_image);
 
+	auto front_image = make_shared<image_texture>("front.jpg");
+	auto front = make_shared<diffuse_light>(front_image);
+	auto back_image = make_shared<image_texture>("back.jpg");
+	auto back = make_shared<diffuse_light>(back_image);
+	
+	auto top_image = make_shared<image_texture>("top.jpg");
+	auto top = make_shared<diffuse_light>(top_image);
+	auto bottom_image = make_shared<image_texture>("bottom.jpg");
+	auto bottom = make_shared<diffuse_light>(bottom_image);
+
+	const int size = 40;
+
+	// Materials
+	
 	// Quads
-	world.add(make_shared<quad>(point3(-3, -2, 5), vec3(0, 0, -4), vec3(0, 4, 0), left_red));
-	world.add(make_shared<quad>(point3(-2, -2, 0), vec3(4, 0, 0), vec3(0, 4, 0), back_green));
-	world.add(make_shared<quad>(point3(3, -2, 1), vec3(0, 0, 4), vec3(0, 4, 0), right_blue));
-	world.add(make_shared<quad>(point3(-2, 3, 1), vec3(4, 0, 0), vec3(0, 0, 4), upper_orange));
-	world.add(make_shared<quad>(point3(-2, -3, 5), vec3(4, 0, 0), vec3(0, 0, -4), lower_teal));
+	world.add(make_shared<quad>(point3(-size/2., size/2., size/2.), vec3(0, -size, 0), vec3(0, 0, -size), left));
+	world.add(make_shared<quad>(point3(size / 2., -size / 2., size / 2.), vec3(0, size, 0), vec3(0, 0, -size), right));
+
+	world.add(make_shared<quad>(point3(-size / 2., size / 2., size / 2.), vec3(size, 0, 0), vec3(0, -size, 0), bottom));
+	world.add(make_shared<quad>(point3(-size / 2., -size / 2., -size / 2.), vec3(size, 0, 0), vec3(0, size, 0), top));
+	
+	world.add(make_shared<quad>(point3(size / 2., size / 2., size / 2.), vec3(-size, 0, 0), vec3(0, 0, -size), back));
+	world.add(make_shared<quad>(point3(-size / 2., -size / 2., -size / 2.), vec3(size, 0, 0), vec3(0, 0, size), front));
 
 }
 
@@ -58,20 +73,33 @@ int main(int argc, char* argv[])
 	quads(world);
 
 	const float aspect_ratio = 1;
-	const int height = 400;
+	const int height = 500;
 	const int tile_count = 4;
 	const int width = (int)(height * aspect_ratio);
 	
 	int keyCode = 0;
 
-	world = hittable_list(make_shared<bvh_node>(world));
+	//world = hittable_list(make_shared<bvh_node>(world));
 
 	std::vector<camera*> cameras;
-	cameras.emplace_back(new camera("uniform random samples", vec3(0, 0, 0), 0.1, 10000, 60, width, height));
-	cameras.emplace_back(new camera("cosine weight random samples", vec3(0, 0, 0), 0.1, 10000, 60, width, height));
+	cameras.emplace_back(
+		new camera(
+			"uniform random samples",   // name
+			vec3(0, 0, 0),              // pos
+			0.1, 10000,                 // near far
+			60,                         // fov
+			width, height,              // buffer size
+			10,                         // bounce
+			10                          // samples
+		));
+
 
 	for (auto& _camera : cameras)
 	{
+		_camera->set_defocus_angle(0.0);
+		_camera->set_fov(120.0);
+		_camera->set_position(vec3(0, 0, -5));
+		_camera->look_at(vec3(0, 0, 0));
 		_camera->render(world, width / tile_count);
 	}
 

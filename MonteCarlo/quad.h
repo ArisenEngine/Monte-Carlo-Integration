@@ -50,7 +50,7 @@ public:
         rec.p = intersection;
         rec.mat = mat;
         rec.set_face_normal(r, normal);
-
+       
         return true;
     }
 

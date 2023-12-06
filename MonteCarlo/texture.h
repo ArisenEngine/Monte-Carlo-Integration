@@ -71,6 +71,7 @@ public:
         auto pixel = image.pixel_data(i, j);
 
         auto color_scale = 1.0 / 255.0;
+       
         return color(color_scale * pixel[0], color_scale * pixel[1], color_scale * pixel[2]);
     }
 

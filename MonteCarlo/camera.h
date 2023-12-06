@@ -27,13 +27,15 @@ public:
 	std::string name{"default"};
 	cv::Mat* buffer{nullptr};
 
-	camera(std::string name, vec3 position, float near, float far, float fov, int width, int height) :
+	camera(std::string name, vec3 position, float near, float far, float fov, int width, int height, int bounce = 10, int samples = 10) :
 		_position(position),
 		_fov(fov),
 		_near(near),
 		_far(far),
 		_aspect_ratio((float)width / height),
-		name(name)
+		name(name),
+		bounce(bounce),
+		sample_count(samples)
 	{
 		cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
 		buffer = new cv::Mat(std::vector<int>{height, width}, CV_8UC3, cv::Scalar( 0 ,0 ,0));
@@ -224,14 +226,14 @@ private:
 
 		if (bounce <= 0 || !_is_running)
 		{
-			return color(0, 0, 0);
+			return color(1, 1, 1);
 		}
 
 		hit_record rec;
 
 		// If the ray hits nothing, return the background color.
 		if (!world.hit(r, interval(0.001, infinity), rec))
-			return background;
+			return sky_color(r);
 
 		
 
