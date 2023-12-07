@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
 			"uniform samples",   // name
 			vec3(0, 0, 0),              // pos
 			0.1, 10000,                 // near far
-			60,                         // fov
+			20,                         // fov
 			width, height,              // buffer size
 			10,                         // bounce
 			100,                         // samples,
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 			"importance samples",       // name
 			vec3(0, 0, 0),              // pos
 			0.1, 10000,                 // near far
-			60,                         // fov
+			20,                         // fov
 			width, height,              // buffer size
 			10,                         // bounce
 			100,                          // samples
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 	for (auto& _camera : cameras)
 	{
 		_camera->set_defocus_angle(0.0);
-		_camera->set_fov(70.0);
+		_camera->set_fov(20.0);
 		_camera->set_position(vec3(0, 10, 20));
 		_camera->look_at(vec3(0, 2.5, 0));
 		_camera->render(world, width / tile_count);

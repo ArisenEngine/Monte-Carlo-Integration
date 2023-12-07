@@ -131,6 +131,30 @@ inline vec3 random_unit_vector() {
     return normalize(random_in_unit_sphere());
 }
 
+inline vec3 cosine_weighted_random_vector( vec3 hit_normal)
+{
+    auto theta = acos(sqrt(1-random_double()));
+    auto fi = 2 * pi * random_double();
+
+    auto x_object = sin(theta) * cos(fi);
+    auto y_object = sin(theta) * sin(fi);
+    auto z_object = cos(theta);
+    auto dir_in_object = normalize(vec3(x_object, y_object, z_object));
+
+    auto up_world = abs(hit_normal.y()) < 0.999 ? vec3(0, 1, 0) : vec3(1, 0, 0);
+    auto x_axis = normalize(cross(up_world, hit_normal));
+    auto y_axis = cross(hit_normal, x_axis);
+    auto z_axis = hit_normal;
+
+
+    return normalize(vec3(
+        dot(vec3(x_axis.x(), y_axis.x(), z_axis.x()), dir_in_object),
+        dot(vec3(x_axis.y(), y_axis.y(), z_axis.y()), dir_in_object),
+        dot(vec3(x_axis.z(), y_axis.z(), z_axis.z()), dir_in_object)
+    )
+    );
+}
+
 inline vec3 random_on_hemisphere(const vec3& normal) {
     vec3 on_unit_sphere = random_unit_vector();
     if (dot(on_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal

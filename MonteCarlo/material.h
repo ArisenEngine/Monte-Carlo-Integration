@@ -26,8 +26,9 @@ public:
 
     bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered, bool importance_sampling = false)
         const override {
-        auto scatter_direction = rec.normal + random_unit_vector();
-        
+        auto scatter_direction = importance_sampling ? 
+            cosine_weighted_random_vector(rec.normal) : random_on_hemisphere(rec.normal);
+        //scatter_direction = random_on_hemisphere(rec.normal);
         // Catch degenerate scatter direction
         if (scatter_direction.near_zero())
         {
