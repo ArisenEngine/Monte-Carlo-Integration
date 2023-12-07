@@ -53,7 +53,12 @@ public:
     bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered, bool importance_sampling = false)
         const override {
         vec3 reflected = reflect(normalize(r_in.direction()), rec.normal);
-        scattered = ray(rec.p, reflected + fuzz * random_in_unit_sphere(), r_in.time());
+
+        scattered = ray(rec.p,
+            importance_sampling?
+            ggx_weighted_random_vector(rec.normal, fuzz) :
+            reflected + fuzz * random_in_unit_sphere(),
+            r_in.time());
         attenuation = albedo->value(rec.u, rec.v, rec.p);;
         return (dot(scattered.direction(), rec.normal) > 0);
     }

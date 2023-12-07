@@ -58,9 +58,13 @@ void quads_glossy(hittable_list& world) {
 	world.add(make_shared<quad>(point3(-size / 2., -size / 2., -size / 2.), vec3(size, 0, 0), vec3(0, 0, size), front));
 
 	// sphere 
-	auto lambertian_sphere = make_shared<lambertian>(color(1.0, 1.0, 1.0));
-	world.add(make_shared<sphere>(point3(0, 0, 0), 5, lambertian_sphere));
+	auto metal_sphere0 = make_shared<metal>(color(227 / 255., 181 / 255., 14 / 255.), 0.1);
+	auto metal_sphere1 = make_shared<metal>(color(227 / 255., 181 / 255., 14 / 255.), 0.5);
+	auto metal_sphere2 = make_shared<metal>(color(227 / 255., 181 / 255., 14 / 255.), 0.9);
 
+	world.add(make_shared<sphere>(point3(-15, 0, 0), 5, metal_sphere0));
+	world.add(make_shared<sphere>(point3(0, 0, 0), 5, metal_sphere1));
+	world.add(make_shared<sphere>(point3(15, 0, 0), 5, metal_sphere2));
 }
 
 void quads_lambertian(hittable_list& world) {
@@ -149,6 +153,7 @@ int main(int argc, char* argv[])
 		_camera->set_fov(20.0);
 		_camera->set_position(vec3(0, 10, 20));
 		_camera->look_at(vec3(0, 2.5, 0));
+		_camera->sample_count = 50;
 		_camera->render(world, width / tile_count);
 	}
 

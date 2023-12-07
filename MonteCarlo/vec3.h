@@ -131,11 +131,26 @@ inline vec3 random_unit_vector() {
     return normalize(random_in_unit_sphere());
 }
 
+inline vec3 sphere_to_world_direction(vec3 hit_normal, float theta, float fi);
 inline vec3 cosine_weighted_random_vector( vec3 hit_normal)
 {
     auto theta = acos(sqrt(1-random_double()));
     auto fi = 2 * pi * random_double();
 
+    return sphere_to_world_direction(hit_normal, theta, fi);
+}
+
+inline vec3 ggx_weighted_random_vector(vec3 hit_normal, float roughness)
+{
+    auto r1 = random_double();
+    auto theta = atan(roughness * sqrt(r1 / (1 - r1)));
+    auto fi = 2 * pi * random_double();
+
+    return sphere_to_world_direction(hit_normal, theta, fi);
+}
+
+inline vec3 sphere_to_world_direction(vec3 hit_normal, float theta, float fi)
+{
     auto x_object = sin(theta) * cos(fi);
     auto y_object = sin(theta) * sin(fi);
     auto z_object = cos(theta);
