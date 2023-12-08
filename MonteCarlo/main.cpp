@@ -150,10 +150,10 @@ int main(int argc, char* argv[])
 	for (auto& _camera : cameras)
 	{
 		_camera->set_defocus_angle(0.0);
-		_camera->set_fov(20.0);
+		_camera->set_fov(60.0);
 		_camera->set_position(vec3(0, 10, 20));
 		_camera->look_at(vec3(0, 2.5, 0));
-		_camera->sample_count = 50;
+		_camera->sample_count = 10;
 		_camera->render(world, width / tile_count);
 	}
 

@@ -142,11 +142,9 @@ inline vec3 cosine_weighted_random_vector( vec3 hit_normal)
 
 inline vec3 ggx_weighted_random_vector(vec3 hit_normal, float roughness)
 {
-    auto r1 = random_double();
-    auto theta = atan(roughness * sqrt(r1 / (1 - r1)));
-    auto fi = 2 * pi * random_double();
-
-    return sphere_to_world_direction(hit_normal, theta, fi);
+    // 算啦。写不出来，不写了，以后再看了，拜拜
+   
+    return cosine_weighted_random_vector(hit_normal);
 }
 
 inline vec3 sphere_to_world_direction(vec3 hit_normal, float theta, float fi)

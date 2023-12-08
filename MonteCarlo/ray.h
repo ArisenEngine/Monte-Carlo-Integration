@@ -1,6 +1,5 @@
 #pragma once
 #include "vec3.h"
-
 class ray {
 public:
 	ray() {}
